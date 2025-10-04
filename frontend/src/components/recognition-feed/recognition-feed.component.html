@@ -1,0 +1,28 @@
+<div>
+    <h3 class="text-xl font-bold text-foreground dark:text-white mb-4">Recognition Feed</h3>
+    <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+        @for (kudo of sortedFeed(); track kudo.id) {
+            <div class="flex items-start space-x-4 animate-fade-in p-2">
+                <img [src]="kudo.from.avatarUrl" alt="{{kudo.from.name}}" class="w-10 h-10 rounded-full">
+                <div class="flex-1">
+                     <p class="text-sm text-muted">
+                        <span class="font-semibold text-foreground dark:text-white">{{ kudo.from.name }}</span>
+                        sent
+                        <span class="font-semibold text-primary">
+                          {{ kudo.amount }} kudos
+                        </span>
+                        to
+                        <span class="font-semibold text-foreground dark:text-white">{{ kudo.to.name }}</span>
+                    </p>
+                    @if(kudo.message) {
+                        <div class="mt-2 text-foreground dark:text-gray-300 text-sm border-l-2 border-border dark:border-zinc-700 pl-3 italic">
+                            "{{ kudo.message }}"
+                        </div>
+                    }
+                </div>
+            </div>
+        } @empty {
+            <p class="text-muted text-center py-8">No kudos have been sent yet.</p>
+        }
+    </div>
+</div>

@@ -1,0 +1,143 @@
+<div class="animate-fade-in space-y-12">
+  <!-- User Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+    @if(dataService.currentUser(); as user) {
+      <div class="bg-white dark:bg-zinc-800 p-5 rounded-xl shadow-soft">
+        <p class="text-sm text-muted">Kudos to Give</p>
+        <p class="text-2xl md:text-3xl font-bold text-foreground dark:text-white mt-1">{{ user.kudosBalance }}</p>
+      </div>
+       <div class="bg-white dark:bg-zinc-800 p-5 rounded-xl shadow-soft">
+        <p class="text-sm text-muted">Points Earned</p>
+        <p class="text-2xl md:text-3xl font-bold text-primary mt-1">{{ user.kudosReceived }}</p>
+      </div>
+       <div class="bg-white dark:bg-zinc-800 p-5 rounded-xl shadow-soft">
+        <p class="text-sm text-muted">Kudos Sent</p>
+        <p class="text-2xl md:text-3xl font-bold text-foreground dark:text-white mt-1">{{ user.kudosSent }}</p>
+      </div>
+      <div class="bg-white dark:bg-zinc-800 p-5 rounded-xl shadow-soft">
+        <p class="text-sm text-muted">Projects</p>
+        <p class="text-2xl md:text-3xl font-bold text-foreground dark:text-white mt-1">{{ user.projectAssignments.length }}</p>
+      </div>
+    }
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Leaderboard & Projects -->
+    <div class="lg:col-span-1 space-y-8">
+      <!-- Podium Section -->
+      <div>
+        <h3 class="text-xl font-bold text-foreground dark:text-white mb-4">Top Performers</h3>
+        @if(topThreeLeaderboard().length >= 3) {
+          <div class="relative flex justify-center items-end gap-2 md:gap-4 h-64">
+            <!-- Second Place -->
+            @if (topThreeLeaderboard()[1]; as secondPlace) {
+                <div class="w-1/3 max-w-xs bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-4 text-center transition-all duration-300 hover:shadow-soft-lg hover:-translate-y-1">
+                    <div class="relative">
+                        <div class="absolute -top-6 -right-5 text-3xl transform -rotate-12">⭐</div>
+                        <div class="absolute -top-3 -left-3 bg-gray-400 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-zinc-800">2</div>
+                        <img [src]="secondPlace.avatarUrl" [alt]="secondPlace.name" class="w-16 h-16 rounded-full mx-auto mb-3 ring-2 ring-offset-4 ring-offset-white dark:ring-offset-zinc-800 ring-gray-300">
+                        <p class="font-bold text-foreground dark:text-white truncate">{{ secondPlace.name }}</p>
+                        <p class="text-sm text-primary font-semibold">{{ secondPlace.kudosReceived }} pts</p>
+                        <button (click)="onSendKudos(secondPlace)" class="mt-4 bg-foreground/5 dark:bg-white/10 text-foreground dark:text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-foreground/10 dark:hover:bg-white/20 transition-colors w-full">
+                            Kudos
+                        </button>
+                    </div>
+                </div>
+            }
+
+            <!-- First Place -->
+            @if (topThreeLeaderboard()[0]; as firstPlace) {
+                <div class="w-1/3 max-w-xs bg-white dark:bg-zinc-800 rounded-xl shadow-soft-lg p-5 text-center z-10 transform scale-110 border-2 border-primary mb-4">
+                     <div class="relative">
+                        <div class="absolute -top-8 -right-6 text-5xl transform rotate-12">⭐</div>
+                        <div class="absolute -top-4 -left-4 bg-primary text-white text-base font-bold w-8 h-8 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-zinc-800">1</div>
+                        <img [src]="firstPlace.avatarUrl" [alt]="firstPlace.name" class="w-20 h-20 rounded-full mx-auto mb-3 ring-2 ring-offset-4 ring-offset-white dark:ring-offset-zinc-800 ring-primary">
+                        <p class="font-bold text-lg text-foreground dark:text-white truncate">{{ firstPlace.name }}</p>
+                        <p class="text-md text-primary font-semibold">{{ firstPlace.kudosReceived }} pts</p>
+                        <button (click)="onSendKudos(firstPlace)" class="mt-4 bg-primary/10 text-primary px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-primary/20 transition-colors w-full">
+                            Send Kudos
+                        </button>
+                    </div>
+                </div>
+            }
+
+            <!-- Third Place -->
+            @if (topThreeLeaderboard()[2]; as thirdPlace) {
+                 <div class="w-1/3 max-w-xs bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-4 text-center transition-all duration-300 hover:shadow-soft-lg hover:-translate-y-1">
+                     <div class="relative">
+                        <div class="absolute -top-6 -left-5 text-3xl transform rotate-12">⭐</div>
+                        <div class="absolute -top-3 -right-3 bg-yellow-600 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-zinc-800">3</div>
+                        <img [src]="thirdPlace.avatarUrl" [alt]="thirdPlace.name" class="w-16 h-16 rounded-full mx-auto mb-3 ring-2 ring-offset-4 ring-offset-white dark:ring-offset-zinc-800 ring-yellow-700">
+                        <p class="font-bold text-foreground dark:text-white truncate">{{ thirdPlace.name }}</p>
+                        <p class="text-sm text-primary font-semibold">{{ thirdPlace.kudosReceived }} pts</p>
+                        <button (click)="onSendKudos(thirdPlace)" class="mt-4 bg-foreground/5 dark:bg-white/10 text-foreground dark:text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-foreground/10 dark:hover:bg-white/20 transition-colors w-full">
+                            Kudos
+                        </button>
+                    </div>
+                 </div>
+            }
+          </div>
+        } @else {
+            <!-- Fallback for less than 3 users -->
+            <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-2 space-y-1">
+                @for (employee of leaderboard(); track employee.id; let i = $index) {
+                    <div class="flex items-center justify-between p-3 rounded-lg hover:bg-background dark:hover:bg-zinc-700">
+                    <div class="flex items-center space-x-4">
+                        <img [src]="employee.avatarUrl" alt="{{employee.name}}" class="w-10 h-10 rounded-full">
+                        <div>
+                        <p class="font-semibold text-foreground dark:text-white">{{ employee.name }}</p>
+                        <p class="text-xs text-muted">{{ employee.kudosReceived }} points</p>
+                        </div>
+                    </div>
+                    <button (click)="onSendKudos(employee)" class="bg-foreground/5 dark:bg-white/10 text-foreground dark:text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-foreground/10 dark:hover:bg-white/20 transition-colors">
+                        Kudos
+                    </button>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Other Leaders List -->
+        @if (otherLeaders().length > 0) {
+          <div class="mt-8">
+             <h4 class="text-sm font-bold uppercase text-muted mb-3 tracking-wider">Next in line</h4>
+            <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-2 space-y-1">
+                @for (employee of otherLeaders(); track employee.id; let i = $index) {
+                    <div class="flex items-center justify-between p-3 rounded-lg hover:bg-background dark:hover:bg-zinc-700">
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-muted w-5 text-center">{{ i + 4 }}</span>
+                            <img [src]="employee.avatarUrl" alt="{{employee.name}}" class="w-10 h-10 rounded-full">
+                            <div>
+                            <p class="font-semibold text-foreground dark:text-white">{{ employee.name }}</p>
+                            <p class="text-xs text-muted">{{ employee.kudosReceived }} points</p>
+                            </div>
+                        </div>
+                        <button (click)="onSendKudos(employee)" class="bg-foreground/5 dark:bg-white/10 text-foreground dark:text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-foreground/10 dark:hover:bg-white/20 transition-colors">
+                            Kudos
+                        </button>
+                    </div>
+                }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div>
+        <h3 class="text-xl font-bold text-foreground dark:text-white mb-4">Active Projects</h3>
+        <div class="space-y-4">
+          @for (project of projects(); track project.id) {
+            <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-5 transition-all hover:shadow-soft-lg">
+              <h4 class="font-bold text-foreground dark:text-white">{{ project.name }}</h4>
+              <p class="text-muted text-sm mt-1">{{ project.description }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Recognition Feed -->
+    <div class="lg:col-span-2">
+      <app-recognition-feed />
+    </div>
+  </div>
+</div>

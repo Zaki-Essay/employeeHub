@@ -1,0 +1,32 @@
+<div class="animate-fade-in">
+  @if(currentUser(); as user) {
+    <div class="text-center mb-10">
+      <p class="text-muted">Use your hard-earned points to claim awesome rewards!</p>
+      <p class="mt-2 text-lg">Your Balance: 
+        <span class="font-bold text-primary">{{ user.kudosReceived }} Points</span>
+      </p>
+    </div>
+  }
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+    @for (reward of rewards(); track reward.id) {
+      @let canAfford = currentUser()!.kudosReceived >= reward.cost;
+      <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft overflow-hidden flex flex-col group animate-slide-in-up">
+        <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden">
+            <img [src]="reward.imageUrl" alt="{{reward.name}}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
+        </div>
+        <div class="p-4 flex flex-col flex-grow">
+          <h4 class="font-bold text-foreground dark:text-white">{{ reward.name }}</h4>
+          <p class="text-sm text-muted mt-1 mb-3 flex-grow">{{ reward.description }}</p>
+          <button 
+            (click)="onRedeem(reward)"
+            [disabled]="!canAfford"
+            class="w-full mt-2 py-2 px-4 rounded-lg font-semibold transition-colors text-sm"
+            [class]="canAfford ? 'bg-primary text-white hover:bg-primary-focus' : 'bg-gray-200 dark:bg-zinc-700 text-muted cursor-not-allowed'">
+            {{ canAfford ? 'Redeem for ' + reward.cost + ' pts' : 'Not Enough Points' }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

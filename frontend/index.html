@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>EmployeeHub</title>
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // Enable class-based dark mode
+      theme: {
+        extend: {
+          colors: {
+            'background': '#F7F7F7', // Off-white/light gray background
+            'foreground': '#111111', // Near-black for text
+            'primary': '#EC4899', // Gumroad-like pink
+            'primary-focus': '#DB2777',
+            'border': '#E5E7EB', // Subtle border color
+            'muted': '#6B7280', // For secondary text
+            'success': '#10B981',
+            'error': '#EF4444',
+            'info': '#3B82F6',
+            'accent': '#F59E0B',
+            // Base colors for dark mode compatibility
+            'base-100': '#111827',
+            'base-200': '#1F2937',
+            'base-300': '#374151',
+          },
+          fontFamily: {
+            sans: ['"Inter"', 'sans-serif'],
+          },
+          borderRadius: {
+            'lg': '0.5rem',
+            'xl': '0.75rem',
+            '2xl': '1rem',
+          },
+          boxShadow: {
+            'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+            'soft-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
+          },
+           animation: {
+            'fade-in': 'fadeIn 0.2s ease-out',
+            'slide-in-up': 'slideInUp 0.2s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: 0 },
+              '100%': { opacity: 1 },
+            },
+            slideInUp: {
+              '0%': { transform: 'translateY(10px)', opacity: 0 },
+              '100%': { transform: 'translateY(0)', opacity: 1 },
+            },
+          }
+        }
+      }
+    }
+  </script>
+<script type="importmap">
+{
+  "imports": {
+    "rxjs": "https://aistudiocdn.com/rxjs@^7.8.2?conditions=es2015",
+    "rxjs/operators": "https://aistudiocdn.com/rxjs@^7.8.2/operators?conditions=es2015",
+    "rxjs/ajax": "https://aistudiocdn.com/rxjs@^7.8.2/ajax?conditions=es2015",
+    "rxjs/webSocket": "https://aistudiocdn.com/rxjs@^7.8.2/webSocket?conditions=es2015",
+    "rxjs/testing": "https://aistudiocdn.com/rxjs@^7.8.2/testing?conditions=es2015",
+    "rxjs/fetch": "https://aistudiocdn.com/rxjs@^7.8.2/fetch?conditions=es2015",
+    "@angular/compiler": "https://next.esm.sh/@angular/compiler@^20.3.3?external=rxjs",
+    "@angular/common": "https://next.esm.sh/@angular/common@^20.3.3?external=rxjs",
+    "@angular/common/http": "https://next.esm.sh/@angular/common@^20.3.3/http?external=rxjs",
+    "@angular/platform-browser": "https://next.esm.sh/@angular/platform-browser@^20.3.3?external=rxjs",
+    "@angular/core": "https://next.esm.sh/@angular/core@^20.3.3?external=rxjs",
+    "@angular/forms": "https://next.esm.sh/@angular/forms@^20.3.3?external=rxjs"
+  }
+}
+</script>
+</head>
+<body class="bg-background dark:bg-zinc-900 text-foreground dark:text-gray-200 antialiased">
+  <app-root></app-root>
+</body>
+</html>

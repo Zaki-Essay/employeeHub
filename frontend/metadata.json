@@ -1,0 +1,5 @@
+{
+  "name": "EmployeeHub",
+  "description": "A modern web application for managing employees, projects, and recognition with a gamified feel. It includes features for sending kudos, redeeming rewards, and viewing analytics dashboards.",
+  "requestFramePermissions": []
+}

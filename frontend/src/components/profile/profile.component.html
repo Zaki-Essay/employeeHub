@@ -1,0 +1,128 @@
+<div class="animate-fade-in text-foreground dark:text-white max-w-4xl mx-auto space-y-12">
+  @if (currentUser(); as user) {
+    <!-- Profile Header -->
+    <div class="flex flex-col md:flex-row items-center gap-6">
+      <img [src]="user.avatarUrl" alt="{{user.name}}" class="w-24 h-24 rounded-full">
+      <div class="text-center md:text-left">
+        <h2 class="text-3xl font-bold">{{ user.name }}</h2>
+        <p class="text-lg text-muted">{{ user.role }}</p>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Left Column: Stats & Badges -->
+      <div class="md:col-span-1 space-y-8">
+        <!-- Stats -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-6 space-y-4">
+          <div class="flex justify-between items-baseline">
+            <p class="text-muted">Kudos to Give</p>
+            <p class="text-xl font-bold text-foreground dark:text-white">{{ user.kudosBalance }}</p>
+          </div>
+           <div class="flex justify-between items-baseline">
+            <p class="text-muted">Points Earned</p>
+            <p class="text-xl font-bold text-primary">{{ user.kudosReceived }}</p>
+          </div>
+           <div class="flex justify-between items-baseline">
+            <p class="text-muted">Kudos Sent</p>
+            <p class="text-xl font-bold text-foreground dark:text-white">{{ user.kudosSent }}</p>
+          </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-6">
+            <h3 class="font-bold mb-4">My Badges</h3>
+            <div class="space-y-3">
+            @for(badge of userBadges(); track badge.id) {
+                <div class="flex items-center" [title]="badge.name + ': ' + badge.description">
+                    <div [innerHTML]="badge.icon" class="w-6 h-6 mr-3 p-0.5" [class]="badge.id === 'giver' ? 'text-pink-500' : badge.id === 'receiver' ? 'text-amber-500' : badge.id === 'project-pro' ? 'text-blue-500' : 'text-indigo-500'"></div>
+                    <span class="text-sm font-medium">{{ badge.name }}</span>
+                </div>
+            }
+            @if (userBadges().length === 0) {
+                 <p class="text-muted text-sm">No badges earned yet.</p>
+            }
+            </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Settings & Role Management -->
+      <div class="md:col-span-2 space-y-8">
+        <!-- General Settings -->
+         <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-6">
+            <h3 class="text-xl font-bold mb-4">Settings</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <label for="darkModeToggle" class="font-medium">Dark Mode</label>
+                    <div class="relative inline-block w-10 align-middle select-none">
+                        <input type="checkbox" id="darkModeToggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer" [checked]="isDarkMode()" (change)="toggleTheme()"/>
+                        <label for="darkModeToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 dark:bg-zinc-700 cursor-pointer"></label>
+                    </div>
+                    <style>.toggle-checkbox { top: -0.125rem; left: -0.125rem; transition: left 0.2s ease-in-out; } .toggle-checkbox:checked { left: 1.125rem; border-color: #EC4899; } .toggle-checkbox:checked + .toggle-label { background-color: #EC4899; }</style>
+                </div>
+                 <div class="flex items-center justify-between">
+                    <label for="teamNotificationToggle" class="font-medium">Enable Team Notifications</label>
+                     <div class="relative inline-block w-10 align-middle select-none">
+                        <input type="checkbox" id="teamNotificationToggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer" [checked]="teamNotifications()" (change)="toggleTeamNotifications()"/>
+                        <label for="teamNotificationToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 dark:bg-zinc-700 cursor-pointer"></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Role Management -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-6">
+            <h3 class="text-xl font-bold mb-4">Manage Custom Roles</h3>
+            <div class="space-y-2 mb-4">
+                @for (role of roleService.roles(); track role) {
+                    <div class="flex items-center justify-between bg-background dark:bg-zinc-700 p-2 rounded-lg">
+                        <span class="font-medium text-sm">{{ role }}</span>
+                        @if (roleService.isDefaultRole(role)) {
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">Default</span>
+                        } @else {
+                             <button (click)="deleteRole(role)" [disabled]="isRoleInUse(role)" class="text-muted hover:text-error disabled:text-gray-600 disabled:cursor-not-allowed" [title]="isRoleInUse(role) ? 'Cannot delete role while it is in use.' : 'Delete role'">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                             </button>
+                        }
+                    </div>
+                }
+            </div>
+            <form (submit)="addRole()" class="flex gap-2">
+                <input type="text" placeholder="Add new role..." class="flex-grow bg-background dark:bg-zinc-700 border border-border dark:border-zinc-600 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                    [ngModel]="newRoleName()" (ngModelChange)="newRoleName.set($event)" name="newRoleName">
+                <button type="submit" class="bg-success text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors text-sm">Add</button>
+            </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Role Management -->
+    <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-soft p-6 mb-8">
+      <h3 class="text-xl font-bold mb-4">Manage User Roles</h3>
+      <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
+        @for(employee of employeesToManage(); track employee.id) {
+          <div class="flex items-center justify-between p-3 rounded-lg bg-background dark:bg-zinc-700">
+            <div class="flex items-center gap-4">
+              <img [src]="employee.avatarUrl" [alt]="employee.name" class="w-10 h-10 rounded-full">
+              <div>
+                <p class="font-semibold text-foreground dark:text-gray-200">{{ employee.name }}</p>
+                <p class="text-sm text-muted">{{ employee.role }}</p>
+              </div>
+            </div>
+            <div>
+              <select 
+                class="bg-white dark:bg-zinc-600 border border-border dark:border-zinc-500 rounded-lg py-1 px-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                [value]="employee.role"
+                (change)="onUserRoleChange(employee, $event)">
+                @for(role of roleService.roles(); track role) {
+                  <option [value]="role">{{ role }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <p>Loading profile...</p>
+  }
+</div>

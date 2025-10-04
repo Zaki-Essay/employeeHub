@@ -1,0 +1,76 @@
+<div class="bg-background dark:bg-zinc-900 min-h-screen font-sans">
+  <!-- Main Container -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Navigation -->
+    <header class="flex justify-between items-center py-5 border-b border-border dark:border-zinc-800">
+      <div class="flex items-center space-x-4">
+        <h1 class="text-2xl font-bold text-foreground dark:text-white">EmployeeHub</h1>
+      </div>
+      <nav class="hidden md:flex items-center space-x-2">
+        @for (view of ['dashboard', 'employees', 'projects', 'rewards']; track view) {
+          <button (click)="changeView(view)" 
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+            [class]="activeView() === view ? 'bg-foreground/5 dark:bg-white/10 text-foreground dark:text-white' : 'text-muted hover:bg-foreground/5 dark:hover:bg-white/5'">
+            {{ view.charAt(0).toUpperCase() + view.slice(1) }}
+          </button>
+        }
+      </nav>
+       @if (currentUser(); as user) {
+        <button (click)="changeView('profile')" class="flex items-center space-x-3 p-1 rounded-full hover:bg-foreground/5 dark:hover:bg-white/5 transition-colors">
+          <img [src]="user.avatarUrl" alt="User Avatar" class="w-8 h-8 rounded-full">
+          <div class="text-left hidden sm:block">
+              <p class="font-semibold text-sm mr-2 text-foreground dark:text-white">{{ user.name }}</p>
+          </div>
+        </button>
+       }
+    </header>
+
+    <!-- Content Area -->
+    <main class="py-8 md:py-12">
+      <!-- Page Header -->
+      <div class="mb-8">
+        <h2 class="text-4xl font-bold tracking-tight text-foreground dark:text-white">{{ activeView().charAt(0).toUpperCase() + activeView().slice(1) }}</h2>
+        @if (activeView() === 'dashboard') {
+          @if (currentUser(); as user) {
+            <p class="text-muted mt-2">Welcome back, {{user.name.split(' ')[0]}}. Here's what's happening.</p>
+          }
+        }
+      </div>
+
+      @switch (activeView()) {
+        @case ('dashboard') {
+          <app-dashboard (sendKudos)="openKudosModal($event)"/>
+        }
+        @case ('employees') {
+          <app-employees (sendKudos)="openKudosModal($event)"/>
+        }
+        @case ('projects') {
+          <app-projects />
+        }
+        @case ('rewards') {
+          <app-rewards (redeem)="handleRedeemReward($event)"/>
+        }
+        @case ('profile') {
+          <app-profile />
+        }
+      }
+    </main>
+  </div>
+</div>
+
+<!-- Kudos Modal -->
+@if (kudosTargetEmployee(); as target) {
+  <app-kudos-modal 
+    [targetEmployee]="target" 
+    [currentUser]="currentUser()" 
+    (close)="closeKudosModal()"
+    (send)="handleSendKudos($event)"/>
+}
+
+<!-- Confetti Animation -->
+@if (showConfetti()) {
+  <app-confetti />
+}
+
+<!-- Notifications -->
+<app-notification [notifications]="notifications()"/>

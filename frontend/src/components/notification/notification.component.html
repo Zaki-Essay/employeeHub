@@ -1,0 +1,9 @@
+<div class="fixed bottom-5 right-5 z-50 space-y-3">
+  @for (notification of notifications(); track notification.id) {
+    <div 
+      class="flex items-center bg-white dark:bg-zinc-800 text-foreground dark:text-white px-5 py-3 rounded-xl shadow-soft-lg animate-slide-in-up border-l-4"
+      [class]="notification.type === 'success' ? 'border-success' : notification.type === 'error' ? 'border-error' : 'border-primary'">
+      <p class="font-medium">{{ notification.message }}</p>
+    </div>
+  }
+</div>
