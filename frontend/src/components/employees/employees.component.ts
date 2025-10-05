@@ -1,11 +1,12 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
+import { ApiService } from '../../services/api.service';
 import { BadgeService } from '../../services/badge.service';
 import { RoleService } from '../../services/role.service';
 import { NotificationService } from '../../services/notification.service';
-import { Employee, EmployeeRole, Badge, ProjectAssignment } from '../../models';
+import { Employee, EmployeeRole, Badge, ProjectAssignment, UserDTO } from '../../models';
 
 @Component({
   selector: 'app-employees',
@@ -14,8 +15,9 @@ import { Employee, EmployeeRole, Badge, ProjectAssignment } from '../../models';
   templateUrl: './employees.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EmployeesComponent {
+export class EmployeesComponent implements OnInit {
   dataService = inject(DataService);
+  apiService = inject(ApiService);
   badgeService = inject(BadgeService);
   roleService = inject(RoleService);
   notificationService = inject(NotificationService);
@@ -29,12 +31,12 @@ export class EmployeesComponent {
   selectedProjectRole = signal<EmployeeRole>('Developer');
 
   roles = computed(() => ['All', ...this.roleService.roles()]);
-  projects = this.dataService.projects;
+  projects = this.apiService.projects;
 
   filteredEmployees = computed(() => {
     const term = this.searchTerm().toLowerCase();
     const role = this.selectedRole();
-    const allEmployees = this.dataService.employees();
+    const allEmployees = this.apiService.employees();
 
     return allEmployees.filter(employee => {
       const nameMatch = employee.name.toLowerCase().includes(term);
@@ -47,20 +49,68 @@ export class EmployeesComponent {
   availableProjects = computed(() => {
     const employee = this.editingAssignmentsFor();
     if (!employee) return [];
-    const assignedProjectIds = new Set(employee.projectAssignments.map(pa => pa.projectId));
-    return this.projects().filter(p => !assignedProjectIds.has(p.id));
+    // For now, return all projects since we don't have project assignments in the backend yet
+    return this.projects();
   });
 
-  getEmployeeBadges(employee: Employee): Badge[] {
-      return this.badgeService.getBadgesForEmployee(employee, this.dataService.employees());
+  ngOnInit() {
+    // Load data from API
+    this.apiService.getAllUsers().subscribe();
+    this.apiService.getAllProjects().subscribe();
   }
 
-  onSendKudos(employee: Employee) {
-    this.sendKudos.emit(employee);
+  getEmployeeBadges(employee: UserDTO): Badge[] {
+      // Convert UserDTO to Employee for badge service compatibility
+      const employeeForBadges: Employee = {
+        id: employee.id,
+        name: employee.name,
+        role: employee.role as EmployeeRole,
+        avatarUrl: employee.avatarUrl,
+        kudosReceived: employee.kudosReceived,
+        kudosBalance: employee.kudosBalance,
+        kudosSent: 0, // Default value since UserDTO doesn't have this
+        projectAssignments: [] // Default empty array since UserDTO doesn't have this
+      };
+      return this.badgeService.getBadgesForEmployee(employeeForBadges, this.apiService.employees().map(u => ({
+        id: u.id,
+        name: u.name,
+        role: u.role as EmployeeRole,
+        avatarUrl: u.avatarUrl,
+        kudosReceived: u.kudosReceived,
+        kudosBalance: u.kudosBalance,
+        kudosSent: 0,
+        projectAssignments: []
+      })));
   }
 
-  openAssignmentModal(employee: Employee) {
-    this.editingAssignmentsFor.set(employee);
+  onSendKudos(employee: UserDTO) {
+    // Convert UserDTO to Employee for the parent component
+    const employeeForKudos: Employee = {
+      id: employee.id,
+      name: employee.name,
+      role: employee.role as EmployeeRole,
+      avatarUrl: employee.avatarUrl,
+      kudosReceived: employee.kudosReceived,
+      kudosBalance: employee.kudosBalance,
+      kudosSent: 0, // Default value
+      projectAssignments: [] // Default empty array
+    };
+    this.sendKudos.emit(employeeForKudos);
+  }
+
+  openAssignmentModal(employee: UserDTO) {
+    // Convert UserDTO to Employee for the modal
+    const employeeForModal: Employee = {
+      id: employee.id,
+      name: employee.name,
+      role: employee.role as EmployeeRole,
+      avatarUrl: employee.avatarUrl,
+      kudosReceived: employee.kudosReceived,
+      kudosBalance: employee.kudosBalance,
+      kudosSent: 0, // Default value
+      projectAssignments: [] // Default empty array
+    };
+    this.editingAssignmentsFor.set(employeeForModal);
     this.selectedProjectId.set(null);
     this.selectedProjectRole.set(this.roleService.roles()[0] || 'Developer');
   }

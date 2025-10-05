@@ -23,6 +23,18 @@ export interface Employee {
   projectAssignments: ProjectAssignment[];
 }
 
+// Backend DTO interface that matches the API response
+export interface UserDTO {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  avatarUrl: string;
+  kudosBalance: number;
+  kudosReceived: number;
+  streakCount: number;
+}
+
 export interface Project {
   id: number;
   name: string;

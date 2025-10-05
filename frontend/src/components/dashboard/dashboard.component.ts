@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject, output, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, output, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
-import { Employee } from '../../models';
+import { ApiService } from '../../services/api.service';
+import { Employee, UserDTO } from '../../models';
 import { RecognitionFeedComponent } from '../recognition-feed/recognition-feed.component';
 
 @Component({
@@ -11,26 +12,32 @@ import { RecognitionFeedComponent } from '../recognition-feed/recognition-feed.c
   templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   dataService = inject(DataService);
-  leaderboard = this.dataService.getKudosLeaderboard;
-  projects = this.dataService.projects;
+  apiService = inject(ApiService);
+  leaderboard = this.apiService.kudosLeaderboard;
+  projects = this.apiService.projects;
   sendKudos = output<Employee>();
 
   topThreeLeaderboard = computed(() => this.leaderboard().slice(0, 3));
   otherLeaders = computed(() => this.leaderboard().slice(3));
 
+  ngOnInit() {
+    // Load data from API
+    this.apiService.getKudosLeaderboard().subscribe();
+  }
+
   onSendKudos(employee: Employee) {
     this.sendKudos.emit(employee);
   }
 
-  getProjectManager(projectId: number): Employee | undefined {
-    return this.dataService.employees().find(e => 
-      e.projectAssignments.some(pa => pa.projectId === projectId && pa.role === 'Project Manager')
+  getProjectManager(projectId: number): UserDTO | undefined {
+    return this.apiService.employees().find(e => 
+      e.role === 'Project Manager' // Simplified for now - would need project assignments in backend
     );
   }
 
   getDeveloperCount(projectId: number): number {
-     return this.dataService.getEmployeesForProject(projectId).filter(e => e.role === 'Developer').length;
+     return this.apiService.employees().filter(e => e.role === 'Developer').length;
   }
 }

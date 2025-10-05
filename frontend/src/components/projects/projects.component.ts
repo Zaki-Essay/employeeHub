@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
-import { Employee, Project, EmployeeRole } from '../../models';
+import { ApiService } from '../../services/api.service';
+import { Employee, Project, EmployeeRole, UserDTO } from '../../models';
 import { NotificationService } from '../../services/notification.service';
 import { RoleService } from '../../services/role.service';
 
@@ -13,12 +14,13 @@ import { RoleService } from '../../services/role.service';
   templateUrl: './projects.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProjectsComponent {
+export class ProjectsComponent implements OnInit {
   dataService = inject(DataService);
+  apiService = inject(ApiService);
   notificationService = inject(NotificationService);
   roleService = inject(RoleService);
-  projects = this.dataService.projects;
-  allEmployees = this.dataService.employees;
+  projects = this.apiService.projects;
+  allEmployees = this.apiService.employees;
   roles = this.roleService.roles;
 
   showForm = signal(false);
@@ -49,15 +51,19 @@ export class ProjectsComponent {
     return this.allEmployees().filter(e => !assignedIds.has(e.id));
   });
 
+  ngOnInit() {
+    // Load data from API
+    this.apiService.getAllProjects().subscribe();
+    this.apiService.getAllUsers().subscribe();
+  }
+
   openForm(project: Project | null = null) {
     if (project) {
       this.editingProject.set(project);
       this.projectName.set(project.name);
       this.projectDescription.set(project.description);
-      // Load current assignments for this project
-      const currentAssignments = this.allEmployees()
-        .flatMap(e => e.projectAssignments.filter(pa => pa.projectId === project.id).map(pa => ({ employeeId: e.id, role: pa.role })));
-      this.projectAssignments.set(currentAssignments);
+      // For now, start with empty assignments since UserDTO doesn't have projectAssignments
+      this.projectAssignments.set([]);
 
     } else {
       this.editingProject.set(null);
@@ -81,31 +87,45 @@ export class ProjectsComponent {
 
     if (this.editingProject()) {
       // Update existing project
-      const updatedProject = { 
-        ...this.editingProject()!, 
-        name: this.projectName(), 
-        description: this.projectDescription() 
-      };
-      this.dataService.updateProject(updatedProject);
-      this.dataService.updateProjectAssignments(updatedProject.id, this.projectAssignments());
-      this.notificationService.show('Project updated successfully!', 'success');
-    } else {
-      // Add new project
-      const newProject = this.dataService.addProject({
+      this.apiService.updateProject(this.editingProject()!.id, {
         name: this.projectName(),
         description: this.projectDescription()
+      }).subscribe({
+        next: () => {
+          this.notificationService.show('Project updated successfully!', 'success');
+          this.closeForm();
+        },
+        error: (error) => {
+          this.notificationService.show(error.message || 'Failed to update project', 'error');
+        }
       });
-      // Assign members to the newly created project
-      this.dataService.updateProjectAssignments(newProject.id, this.projectAssignments());
-      this.notificationService.show('Project added successfully!', 'success');
+    } else {
+      // Add new project
+      this.apiService.createProject({
+        name: this.projectName(),
+        description: this.projectDescription()
+      }).subscribe({
+        next: () => {
+          this.notificationService.show('Project added successfully!', 'success');
+          this.closeForm();
+        },
+        error: (error) => {
+          this.notificationService.show(error.message || 'Failed to create project', 'error');
+        }
+      });
     }
-    this.closeForm();
   }
   
   deleteProject(project: Project) {
     if (confirm(`Are you sure you want to delete the project "${project.name}"? This action cannot be undone.`)) {
-      this.dataService.deleteProject(project.id);
-      this.notificationService.show('Project deleted successfully.', 'success');
+      this.apiService.deleteProject(project.id).subscribe({
+        next: () => {
+          this.notificationService.show('Project deleted successfully.', 'success');
+        },
+        error: (error) => {
+          this.notificationService.show(error.message || 'Failed to delete project', 'error');
+        }
+      });
     }
   }
 
@@ -134,26 +154,23 @@ export class ProjectsComponent {
     this.newAssignmentRole.set(this.roles()[0] || 'Developer');
   }
 
-  getEmployeesForProject(projectId: number): Employee[] {
-    return this.dataService.getEmployeesForProject(projectId);
+  getEmployeesForProject(projectId: number): UserDTO[] {
+    // For now, return all employees since we don't have project assignments in the backend yet
+    return this.allEmployees();
   }
   
-  getProjectManager(projectId: number): Employee | undefined {
-    return this.dataService.employees().find(e => 
-      e.projectAssignments.some(pa => pa.projectId === projectId && pa.role === 'Project Manager')
-    );
+  getProjectManager(projectId: number): UserDTO | undefined {
+    // For now, return the first employee with Project Manager role
+    return this.allEmployees().find(e => e.role === 'Project Manager');
   }
 
   getDeveloperCount(projectId: number): number {
-    return this.getEmployeesForProject(projectId)
-      .filter(employee => 
-        employee.projectAssignments.some(assignment => 
-          assignment.projectId === projectId && assignment.role === 'Developer'
-        )
-      ).length;
+    // For now, return count of all developers
+    return this.allEmployees().filter(e => e.role === 'Developer').length;
   }
 
-  getRoleForProject(employee: Employee, projectId: number): EmployeeRole {
-    return employee.projectAssignments.find(pa => pa.projectId === projectId)?.role || employee.role;
+  getRoleForProject(employee: UserDTO, projectId: number): EmployeeRole {
+    // For now, return the employee's main role
+    return employee.role as EmployeeRole;
   }
 }

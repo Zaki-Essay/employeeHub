@@ -6,7 +6,7 @@
     "app": {
       "projectType": "application",
       "root": "",
-      "sourceRoot": "./",
+      "sourceRoot": "src",
       "prefix": "app",
       "architect": {
         "build": {
@@ -16,8 +16,16 @@
               "base": "./dist",
               "browser": "."
             },
+            "index": "index.html",
             "browser": "index.tsx",
-            "tsConfig": "tsconfig.json"
+            "tsConfig": "tsconfig.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "/assets"
+              }
+            ]
           },
           "configurations": {
             "production": {
@@ -34,7 +42,8 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "port": 3000
+            "port": 3000,
+            "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {
@@ -48,5 +57,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
