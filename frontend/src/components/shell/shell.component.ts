@@ -1,9 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import {Component, ChangeDetectionStrategy, inject, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { NotificationComponent } from '../notification/notification.component';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+
+type View = 'dashboard' | 'employees' | 'projects' | 'rewards' | 'profile';
 
 @Component({
   selector: 'app-shell',
@@ -22,9 +24,19 @@ import { NotificationService } from '../../services/notification.service';
             <a routerLink="/projects" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors">Projects</a>
             <a routerLink="/rewards" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors">Rewards</a>
           </nav>
-          <button (click)="authService.logout()" class="px-3 py-1 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-md hover:bg-red-50 transition-colors">
-            Logout
-          </button>
+          <div class="flex items-center space-x-4">
+            @if (currentUser(); as user) {
+              <button (click)="changeView('profile')" class="flex items-center space-x-3 p-1 rounded-full hover:bg-foreground/5 dark:hover:bg-white/5 transition-colors">
+                <img [src]="user.avatarUrl" alt="User Avatar" class="w-8 h-8 rounded-full">
+                <div class="text-left hidden sm:block">
+                  <p class="font-semibold text-sm mr-2 text-foreground dark:text-white">{{ user.name }}</p>
+                </div>
+              </button>
+            }
+            <button (click)="authService.logout()" class="px-3 py-1 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-md hover:bg-red-50 transition-colors">
+              Logout
+            </button>
+          </div>
         </header>
 
         <main class="py-8 md:py-12">
@@ -39,5 +51,13 @@ import { NotificationService } from '../../services/notification.service';
 })
 export class ShellComponent {
   authService = inject(AuthService);
+  currentUser = this.authService.currentUser;
+  activeView = signal<View>('dashboard');
   notificationService = inject(NotificationService);
+  router = inject(Router);
+  
+  changeView(view: View) {
+    this.activeView.set(view);
+    this.router.navigate([`/${view}`]);
+  }
 }

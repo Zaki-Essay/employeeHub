@@ -28,6 +28,7 @@ public class KudosService {
 
     private final KudosRepository kudosRepository;
     private final UserRepository userRepository;
+    private final TeamsWebhookService teamsWebhookService;
 
     public KudosDTO sendKudos(SendKudosRequest request) {
         User sender = getCurrentUser();
@@ -64,7 +65,17 @@ public class KudosService {
                 .isStreakBonus(isStreak)
                 .build();
 
-        return toDto(kudosRepository.save(kudos));
+        Kudos savedKudos = kudosRepository.save(kudos);
+        
+        // Send notification to Teams channel
+        teamsWebhookService.sendKudosNotification(
+                sender.getName(),
+                receiver.getName(),
+                totalAmount,
+                request.getMessage()
+        );
+
+        return toDto(savedKudos);
     }
 
     public List<KudosDTO> feed(int page, int size) {
@@ -74,7 +85,7 @@ public class KudosService {
     }
 
     public List<UserDTO> leaderboard() {
-        return userRepository.findTopUsersByKudosReceived().stream().limit(5).map(this::toUserDto).collect(Collectors.toList());
+        return userRepository.findTopUsersByKudosReceived().stream().map(this::toUserDto).collect(Collectors.toList());
     }
 
     private boolean isDailyStreak(User sender) {

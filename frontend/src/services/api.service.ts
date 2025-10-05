@@ -54,7 +54,7 @@ export interface RewardDTO {
 }
 
 export interface SendKudosRequest {
-  toUserId: number;
+  receiverId: number;
   amount: number;
   message: string;
 }
@@ -273,7 +273,7 @@ export class ApiService {
 
   // Computed properties
   public kudosLeaderboard = computed(() => {
-    return this.employees().slice().sort((a, b) => b.kudosReceived - a.kudosReceived).slice(0, 5);
+    return this.employees().slice().sort((a, b) => b.kudosReceived - a.kudosReceived);
   });
 
   // Error handling

@@ -121,3 +121,13 @@
     </div>
   </div>
 }
+
+<!-- Kudos Modal -->
+@if (showKudosModal() && selectedEmployee() && authService.currentUser()) {
+  <app-kudos-modal 
+    [targetEmployee]="selectedEmployee()!"
+    [currentUser]="authService.currentUser()!"
+    (close)="onCloseModal()"
+    (send)="onSendKudosConfirmed($event)"
+  />
+}

@@ -3,21 +3,24 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 import { BadgeService } from '../../services/badge.service';
 import { RoleService } from '../../services/role.service';
 import { NotificationService } from '../../services/notification.service';
 import { Employee, EmployeeRole, Badge, ProjectAssignment, UserDTO } from '../../models';
+import { KudosModalComponent } from '../kudos-modal/kudos-modal.component';
 
 @Component({
   selector: 'app-employees',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, KudosModalComponent],
   templateUrl: './employees.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployeesComponent implements OnInit {
   dataService = inject(DataService);
   apiService = inject(ApiService);
+  authService = inject(AuthService);
   badgeService = inject(BadgeService);
   roleService = inject(RoleService);
   notificationService = inject(NotificationService);
@@ -29,6 +32,9 @@ export class EmployeesComponent implements OnInit {
   editingAssignmentsFor = signal<Employee | null>(null);
   selectedProjectId = signal<number | null>(null);
   selectedProjectRole = signal<EmployeeRole>('Developer');
+
+  showKudosModal = signal(false);
+  selectedEmployee = signal<Employee | null>(null);
 
   roles = computed(() => ['All', ...this.roleService.roles()]);
   projects = this.apiService.projects;
@@ -84,7 +90,7 @@ export class EmployeesComponent implements OnInit {
   }
 
   onSendKudos(employee: UserDTO) {
-    // Convert UserDTO to Employee for the parent component
+    // Convert UserDTO to Employee for the modal
     const employeeForKudos: Employee = {
       id: employee.id,
       name: employee.name,
@@ -95,7 +101,31 @@ export class EmployeesComponent implements OnInit {
       kudosSent: 0, // Default value
       projectAssignments: [] // Default empty array
     };
-    this.sendKudos.emit(employeeForKudos);
+    this.selectedEmployee.set(employeeForKudos);
+    this.showKudosModal.set(true);
+  }
+
+  onCloseModal() {
+    this.showKudosModal.set(false);
+    this.selectedEmployee.set(null);
+  }
+
+  onSendKudosConfirmed(data: { to: Employee, amount: number, message: string }) {
+    this.apiService.sendKudos({
+      receiverId: data.to.id,
+      amount: data.amount,
+      message: data.message
+    }).subscribe({
+      next: () => {
+        this.onCloseModal();
+        // Refresh employee list
+        this.apiService.getAllUsers().subscribe();
+      },
+      error: (error) => {
+        console.error('Failed to send kudos:', error);
+        this.onCloseModal();
+      }
+    });
   }
 
   openAssignmentModal(employee: UserDTO) {
