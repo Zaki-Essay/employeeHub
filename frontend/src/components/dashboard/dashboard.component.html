@@ -26,7 +26,7 @@
     <div class="lg:col-span-1 space-y-8">
       <!-- Podium Section -->
       <div>
-        <h3 class="text-xl font-bold text-foreground dark:text-white mb-4">Top Performers</h3>
+        <h3 class="text-xl font-bold text-foreground dark:text-white mb-6">Top Performers</h3>
         @if(topThreeLeaderboard().length >= 3) {
           <div class="relative flex justify-center items-end gap-2 md:gap-4 h-62">
             <!-- Second Place -->
@@ -142,11 +142,11 @@
   </div>
 </div>
 
-@if (showKudosModal() && selectedEmployee() && authService.currentUser()) {
-  <app-kudos-modal 
-    [targetEmployee]="selectedEmployee()!"
-    [currentUser]="authService.currentUser()!"
-    (close)="onCloseModal()"
-    (send)="onSendKudosConfirmed($event)"
-  />
+@if (showKudosModal() && selectedEmployee() && currentUser()) {
+    <app-kudos-modal
+            [targetEmployee]="selectedEmployee()!"
+            [currentUser]="currentUser()!"
+            (close)="onCloseModal()"
+            (send)="onSendKudosConfirmed($event)">
+    </app-kudos-modal>
 }

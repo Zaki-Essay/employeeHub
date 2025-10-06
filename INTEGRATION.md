@@ -168,3 +168,4 @@ start-dev.bat
 - Review backend logs for server-side errors
 - Use browser developer tools for frontend debugging
 - Verify database connection and data seeding
+

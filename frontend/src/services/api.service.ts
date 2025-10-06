@@ -1,8 +1,9 @@
-import { Injectable, signal, computed } from '@angular/core';
+import {Injectable, signal, computed, inject} from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Employee, Project, Reward, KudoTransaction, UserDTO } from '../models';
+import {NotificationService} from "@/src/services/notification.service";
 
 // API Response interfaces
 export interface AuthResponse {
@@ -89,6 +90,7 @@ export class ApiService {
   public rewards = signal<RewardDTO[]>([]);
   public kudosFeed = signal<KudosDTO[]>([]);
   public currentUser = signal<AuthResponse | null>(null);
+  public notificationService = inject(NotificationService);
 
   constructor(private http: HttpClient) {
     this.loadCurrentUser();
@@ -233,6 +235,7 @@ export class ApiService {
           this.kudosFeed.update(feed => [kudos, ...feed]);
           // Refresh current user to get updated kudos balance
           this.getCurrentUser().subscribe();
+          this.notificationService.show('success');
         }),
         catchError(this.handleError)
       );

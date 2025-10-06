@@ -76,3 +76,4 @@ These are handled with default values in the frontend until the backend is exten
 ## Result
 
 All TypeScript compilation errors have been resolved. The application now properly integrates the Angular frontend with the Spring Boot backend while maintaining type safety and compatibility.
+
